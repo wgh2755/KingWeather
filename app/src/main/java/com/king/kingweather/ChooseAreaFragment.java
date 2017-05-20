@@ -153,25 +153,6 @@ public class ChooseAreaFragment extends Fragment {
         queryProvinces();
     }
 
-
-//    public boolean onKeyDown(int keyCode, KeyEvent event){
-//        if (keyCode==KeyEvent.KEYCODE_BACK){
-//            switch (currentLevel){
-//                case LEVEL_COUNTY:
-//                    queryCities();
-//                    break;
-//                case LEVEL_CITY:
-//                    queryProvinces();
-//                    break;
-//                case LEVEL_PROVINCE:
-//                    Toast.makeText(getActivity(),"再按一次退出程序",Toast.LENGTH_SHORT).show();
-//                default:
-//            }
-//            return true;
-//        }
-//        return false;
-//    }
-
     //查询全国所有的省,优先从数据库查询,如果没有查询到再去服务器上获取
     private void queryProvinces() {
         titletext.setText("中国");
