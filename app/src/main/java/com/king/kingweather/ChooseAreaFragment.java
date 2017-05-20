@@ -1,10 +1,10 @@
 package com.king.kingweather;
 
 
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +37,8 @@ import okhttp3.Response;
  */
 public class ChooseAreaFragment extends Fragment {
 
+    private static final String TAG = "ChooseAreaFragment:hua";
+
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -68,6 +70,7 @@ public class ChooseAreaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: 执行到添加界面");
         View view = inflater.inflate(R.layout.choose_area,container,false);
         titletext = (TextView) view.findViewById(R.id.titlle_text);
         backButton = (Button) view.findViewById(R.id.back_button);
@@ -80,6 +83,7 @@ public class ChooseAreaFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated: ");
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -103,6 +107,8 @@ public class ChooseAreaFragment extends Fragment {
                                 break;
                             case LEVEL_CITY:
                                 queryProvinces();
+                                break;
+                            default:
                         }
                     }
                 });
@@ -116,6 +122,7 @@ public class ChooseAreaFragment extends Fragment {
         titletext.setText("中国");
         backButton.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
+        Log.d(TAG, "queryProvinces:准备查询数据 ");
         if (provinceList.size()>0){
             dataList.clear();
             for (Province province :provinceList){
@@ -125,6 +132,7 @@ public class ChooseAreaFragment extends Fragment {
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
         }else {
+            Log.d(TAG, "queryProvinces: 网络请求省份数据");
             String address = "http://guolin.tech/api/china";
             queryFromServer(address,"province");
         }
@@ -144,6 +152,7 @@ public class ChooseAreaFragment extends Fragment {
             listView.setSelection(0);
             currentLevel = LEVEL_CITY;
         }else {
+            Log.d(TAG, "queryCities: 请求市级网络数据");
             int provinceCode = selectedProvince.getProvinceCode();
             String address = "http://guolin.tech/api/china/"+provinceCode;
             queryFromServer(address,"city");
@@ -164,6 +173,7 @@ public class ChooseAreaFragment extends Fragment {
             listView.setSelection(0);
             currentLevel = LEVEL_COUNTY;
         }else {
+            Log.d(TAG, "queryCounties: 请求县级网络数据");
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
             String address = "http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;
@@ -174,9 +184,11 @@ public class ChooseAreaFragment extends Fragment {
     //根据传入的地址以及类型,从服务器上查询所有省市县数据
     private void queryFromServer(String address, final String type){
         showProgressDialog();
+        Log.d(TAG, "queryFromServer: 开始请求数据");
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "onFailure: 请求失败");
                 //通过runOnUiThread()方法回到主线程处理逻辑
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -190,17 +202,21 @@ public class ChooseAreaFragment extends Fragment {
 
             @Override
             public void onResponse(final Call call, Response response) throws IOException {
+                Log.d(TAG, "onResponse: 开始获取网络数据");
                 String responseText = response.body().string();
                 boolean result = false;
                 switch (type){
                     case "province":
                         result = Utility.handleProvinceResponse(responseText);
+                        Log.d(TAG, "onResponse: 展示省级界面");
                         break;
                     case "city":
                         result = Utility.handleCityResponse(responseText,selectedProvince.getId());
+                        Log.d(TAG, "onResponse: 展示市级界面");
                         break;
                     case "county":
                         result = Utility.handleCountyResponse(responseText,selectedCity.getId());
+                        Log.d(TAG, "onResponse: 展示县级界面");
                         break;
                     default:
                 }
