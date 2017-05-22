@@ -2,6 +2,7 @@ package com.king.kingweather;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -132,6 +133,14 @@ public class ChooseAreaFragment extends Fragment {
                         selectedCity = cityList.get(position);
                         queryCounties();
                         break;
+                    case LEVEL_COUNTY:
+                        String cityName = countyList.get(position).getCountyName();
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("cityName",cityName);
+                        intent.putExtra("select",true);
+                        startActivity(intent);
+                        getActivity().finish();
+                        Log.d(TAG, "onItemClick: "+cityName);
                     default:
                 }
                 backButton.setOnClickListener(new View.OnClickListener() {
