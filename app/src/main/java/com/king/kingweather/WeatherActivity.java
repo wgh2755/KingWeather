@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -50,7 +52,10 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView sportText;
     private TextView airText;
     private ImageView bingPicImg;
-    private String weatherName;
+    public String weatherName;
+    public DrawerLayout drawerLayout;
+    private Button navButton;
+    ChooseAreaFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,23 +80,21 @@ public class WeatherActivity extends AppCompatActivity {
         airText = (TextView) findViewById(R.id.air_text);
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
-        Button button = (Button) findViewById(R.id.button_select);
-
-        button.setOnClickListener(new View.OnClickListener() {
+        navButton = (Button) findViewById(R.id.button_select);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplication(), MainActivity.class);
-                startActivity(intent);
-                finish();
+                drawerLayout.openDrawer(GravityCompat.START);
             }
         });
-        Boolean select = getIntent().getBooleanExtra("select", false);
-        if (select) {
-            String cityName = getIntent().getStringExtra("cityName");
-            weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(cityName);
-            Log.d(TAG, "onCreate: weatherstring为空");
-        } else {
+//        Boolean select = getIntent().getBooleanExtra("select", false);
+//        if (select) {
+//            String cityName = getIntent().getStringExtra("cityName");
+//            weatherLayout.setVisibility(View.INVISIBLE);
+//            requestWeather(cityName);
+//            Log.d(TAG, "onCreate: weatherstring为空");
+//        } else {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String bingPic = prefs.getString("bingPic", null);
             if (bingPic != null) {
@@ -112,7 +115,7 @@ public class WeatherActivity extends AppCompatActivity {
                 weatherLayout.setVisibility(View.INVISIBLE);
                 requestWeather(weatherName);
             }
-        }
+//        }
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -145,7 +148,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void requestWeather(String cityName) {
+    public void requestWeather(String cityName) {
         String weatherUrl = "https://free-api.heweather.com/v5/weather?city=" + cityName + "&key=885228adb2dd4b52b846c17fcf95e629";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -173,13 +176,14 @@ public class WeatherActivity extends AppCompatActivity {
                             editor.putString("weather", responseText);
                             editor.apply();
                             showWeatherInfo(weather);
+                            Intent intent = new Intent(WeatherActivity.this,AutoUpdateService.class);
+                            startService(intent);
                         } else {
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
                         swipeRefresh.setRefreshing(false);
                     }
                 });
-
             }
         });
         loadBingPic();

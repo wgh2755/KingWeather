@@ -2,7 +2,6 @@ package com.king.kingweather;
 
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -45,7 +44,7 @@ public class ChooseAreaFragment extends Fragment {
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
     private ProgressDialog progressDialog;
-    private TextView titletext;
+    private TextView titleText;
     private Button backButton;
     private ListView listView;
     private ArrayAdapter<String> adapter;
@@ -67,14 +66,14 @@ public class ChooseAreaFragment extends Fragment {
     private City selectedCity;
 
     //当前选中的级别
-    private int currentLevel;
+    public int currentLevel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: 执行到添加界面");
         View view = inflater.inflate(R.layout.choose_area, container, false);
-        titletext = (TextView) view.findViewById(R.id.titlle_text);
+        titleText = (TextView) view.findViewById(R.id.titlle_text);
         backButton = (Button) view.findViewById(R.id.back_button);
         listView = (ListView) view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
@@ -107,6 +106,7 @@ public class ChooseAreaFragment extends Fragment {
     };
 
     private long exitTime = 0;
+
     public void exit() {
         if ((System.currentTimeMillis() - exitTime) > 2000) {
             Toast.makeText(getContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
@@ -134,13 +134,21 @@ public class ChooseAreaFragment extends Fragment {
                         queryCounties();
                         break;
                     case LEVEL_COUNTY:
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
                         String cityName = countyList.get(position).getCountyName();
-                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                        intent.putExtra("cityName",cityName);
-                        intent.putExtra("select",true);
-                        startActivity(intent);
-                        getActivity().finish();
-                        Log.d(TAG, "onItemClick: "+cityName);
+                        activity.requestWeather(cityName);
+                        activity.weatherName = cityName;
+                        queryProvinces();
+                        break;
+//                        String cityName = countyList.get(position).getCountyName();
+//                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+//                        intent.putExtra("cityName",cityName);
+//                        intent.putExtra("select",true);
+//                        startActivity(intent);
+//                        getActivity().finish();
+//                        Log.d(TAG, "onItemClick: "+cityName);
                     default:
                 }
                 backButton.setOnClickListener(new View.OnClickListener() {
@@ -163,8 +171,8 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     //查询全国所有的省,优先从数据库查询,如果没有查询到再去服务器上获取
-    private void queryProvinces() {
-        titletext.setText("中国");
+    public void queryProvinces() {
+        titleText.setText("中国");
         backButton.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
         Log.d(TAG, "queryProvinces:准备查询数据 ");
@@ -185,7 +193,7 @@ public class ChooseAreaFragment extends Fragment {
 
     //查询选中的省份的所有城市,优先读取本地数据库,如果没有查询到再去服务器上查询
     private void queryCities() {
-        titletext.setText(selectedProvince.getProvinceName());
+        titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
         cityList = DataSupport.where("provinceid = ?", String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0) {
@@ -206,7 +214,7 @@ public class ChooseAreaFragment extends Fragment {
 
     //查询选中的市内的所有县数据,优先查数据库,没有就网上下载
     private void queryCounties() {
-        titletext.setText(selectedCity.getCityName());
+        titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
         countyList = DataSupport.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {
