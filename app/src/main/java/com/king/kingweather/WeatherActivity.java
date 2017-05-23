@@ -218,12 +218,13 @@ public class WeatherActivity extends AppCompatActivity {
         if (weather.aqi != null) {
             aqiText.setText(weather.aqi.city.aqi);
             pm25Text.setText(weather.aqi.city.pm25);
+            String air = "空气质量" + weather.aqi.city.quality;
+            airText.setText(air);
         }
         String comfort = "舒适度:" + weather.suggestion.comf.brf + "\n" + weather.suggestion.comf.txt;
         String carWash = "洗车指数:" + weather.suggestion.cw.brf + "\n" + weather.suggestion.cw.txt;
         String sport = "运动建议:" + weather.suggestion.sport.brf + "\n" + weather.suggestion.sport.txt;
-        String air = "空气质量" + weather.suggestion.air.brf;
-        airText.setText(air);
+
         comfortText.setText(comfort);
         carWashText.setText(carWash);
         sportText.setText(sport);
@@ -231,7 +232,6 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     private long exitTime = 0;
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {

@@ -1,6 +1,7 @@
 package com.king.kingweather;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -96,7 +97,8 @@ public class ChooseAreaFragment extends Fragment {
                         queryProvinces();
                         break;
                     case LEVEL_PROVINCE:
-                        exit();
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
                     default:
                 }
                 return true;
@@ -104,18 +106,6 @@ public class ChooseAreaFragment extends Fragment {
             return false;
         }
     };
-
-    private long exitTime = 0;
-
-    public void exit() {
-        if ((System.currentTimeMillis() - exitTime) > 2000) {
-            Toast.makeText(getContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
-            exitTime = System.currentTimeMillis();
-        } else {
-            getActivity().finish();
-            System.exit(0);
-        }
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
